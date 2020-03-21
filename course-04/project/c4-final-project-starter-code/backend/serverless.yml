@@ -7,10 +7,30 @@ plugins:
 
 provider:
   name: aws
-  runtime: nodejs8.10
+  runtime: nodejs12.x
 
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-1'}
+
+  environment:
+    TODOS_TABLE: Todos-${self:provider.stage}
+    USER_ID_INDEX: Todos-uid-ndx-${self:provider.stage}
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}"
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+      Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/*"   
 
 functions:
 
@@ -23,16 +43,17 @@ functions:
     events:
       - http:
           method: get
-          path: todos
+          path: todos/
+          cors: true
 
   # TODO: Configure this function
-  GetTodos:
   CreateTodo:
     handler: src/lambda/http/createTodo.handler
     events:
       - http:
           method: post
           path: todos
+          cors: true
 
   # TODO: Configure this function
   UpdateTodo:
@@ -41,6 +62,7 @@ functions:
       - http:
           method: patch
           path: todos/{todoId}
+          cors: true
 
   # TODO: Configure this function
   DeleteTodo:
@@ -49,6 +71,7 @@ functions:
       - http:
           method: delete
           path: todos/{todoId}
+          cors: true
 
   # TODO: Configure this function
   GenerateUploadUrl:
@@ -57,7 +80,34 @@ functions:
       - http:
           method: post
           path: todos/{todoId}/attachment
+          cors: true
 
 resources:
   Resources:
-    # TODO: Add any necessary AWS resources
+    TodosTable:
+          Type: AWS::DynamoDB::Table
+          Properties:
+            AttributeDefinitions:
+              - AttributeName: userId
+                AttributeType: S
+              - AttributeName: createdAt
+                AttributeType: S
+              - AttributeName: todoId
+                AttributeType: S
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+              - AttributeName: todoId
+                KeyType: RANGE
+            BillingMode: PAY_PER_REQUEST
+            TableName: ${self:provider.environment.TODOS_TABLE}
+            GlobalSecondaryIndexes:
+              - IndexName: ${self:provider.environment.USER_ID_INDEX}
+                KeySchema:
+                  - AttributeName: userId
+                    KeyType: HASH
+                  - AttributeName: createdAt
+                    KeyType: RANGE
+                Projection:
+                  ProjectionType: ALL
+    

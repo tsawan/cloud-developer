@@ -3,7 +3,7 @@ import 'source-map-support/register'
 import { APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyHandler } from 'aws-lambda'
 
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
-import { TodoItem } from '../../models/TodoItem'
+//import { TodoItem } from '../../models/TodoItem'
 import { getUserId } from '../utils'
 
 const docClient: DocumentClient = new DocumentClient()
@@ -13,8 +13,18 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   const todoId = event.pathParameters.todoId
 
   // TODO: Remove a TODO item by id
-  deleteTodo(todoId, event);
-  return undefined
+  const deleted = deleteTodo(todoId, event);
+  
+  return {
+    statusCode: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true
+    },
+    body: JSON.stringify({
+      deleted
+    })
+  }   
 }
 
 const deleteTodo = async (todoId: string, event: APIGatewayProxyEvent) => {
