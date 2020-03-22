@@ -41,7 +41,7 @@ functions:
     handler: src/lambda/http/getTodos.handler
     events:
       - http:
-          method: get
+          method: GET
           path: todos/
           authorizer: Auth
           cors: true
@@ -69,7 +69,7 @@ functions:
     handler: src/lambda/http/deleteTodo.handler
     events:
       - http:
-          method: delete
+          method: DELETE
           path: todos/{todoId}
           authorizer: Auth
           cors: true

@@ -1,6 +1,7 @@
 import 'source-map-support/register'
 
-import { APIGatewayProxyResult, APIGatewayProxyHandler } from 'aws-lambda'
+import { APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyHandler } from 'aws-lambda'
+import { getUserId } from '../utils'
 
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { TodoItem } from '../../models/TodoItem'
@@ -8,9 +9,8 @@ import { TodoItem } from '../../models/TodoItem'
 const docClient: DocumentClient = new DocumentClient()
 const todosTable = process.env.TODOS_TABLE
 
-export const handler: APIGatewayProxyHandler = async () : Promise<APIGatewayProxyResult> => {
-  // TODO: Get all TODO items for a current user
-  const userId = 'tahir' // hardcode for now, later get from jwt
+export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent) : Promise<APIGatewayProxyResult> => {
+  const userId = getUserId(event)
   const todos = await getTodos(userId);
 
   return {
@@ -25,7 +25,6 @@ export const handler: APIGatewayProxyHandler = async () : Promise<APIGatewayProx
   }  
 }
 
-// parseUserId(jwtToken)
 const getTodos = async (userId: string) => {
   const result = await docClient.query({
       TableName: todosTable,
@@ -37,6 +36,5 @@ const getTodos = async (userId: string) => {
           ':i': userId
       },
   }).promise()
-//  return result;
   return result.Items as TodoItem[];
 }
