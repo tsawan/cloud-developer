@@ -30,10 +30,11 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
 
   const updateTodo = async (todoId: string, updatedTodo: UpdateTodoRequest,
     event: APIGatewayProxyEvent) => {
+      console.log(updatedTodo, event);
     const response = await docClient.update({
       TableName: todosTable,
       Key: {
-        userId: getUserId(event),
+        //userId: getUserId(event),
         todoId: todoId
       }
     }).promise()

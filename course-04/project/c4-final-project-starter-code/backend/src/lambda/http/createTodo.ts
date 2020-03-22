@@ -5,21 +5,26 @@ import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } f
 import { CreateTodoRequest } from '../../requests/CreateTodoRequest'
 
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
+import { getUserId } from '../utils'
 
 const docClient: DocumentClient = new DocumentClient()
 const todosTable = process.env.TODOS_TABLE
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  const newTodo: CreateTodoRequest = JSON.parse(event.body)
+  const parsedBody: CreateTodoRequest = JSON.parse(event.body)
+  console.log('received create req');
+  const newTodo = {
+    userId: getUserId(event),
+    ...parsedBody
+  }
 
-  // TODO: Implement creating a new TODO item
   await docClient.put({
     TableName: todosTable,
     Item: newTodo
   }).promise()
 
   return {
-    statusCode: 201,
+    statusCode: 200,
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Credentials': true
