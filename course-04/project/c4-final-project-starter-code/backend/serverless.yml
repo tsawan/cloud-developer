@@ -37,7 +37,6 @@ functions:
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
 
-  # TODO: Configure this function
   GetTodos:
     handler: src/lambda/http/getTodos.handler
     events:
@@ -45,30 +44,24 @@ functions:
           method: get
           path: todos/
           authorizer: Auth
-          cors:
-            - enabled: true
-            - origin: '*'
-            - headers: 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'
-            - methods: 'PUT,POST,UPDATE'          
+          cors: true
 
-  # TODO: Configure this function
   CreateTodo:
     handler: src/lambda/http/createTodo.handler
     events:
       - http:
           method: POST
           path: todos
-     #     authorizer: Auth
+          authorizer: Auth
           cors: true
-     #     integration: lambda
 
-  # TODO: Configure this function
   UpdateTodo:
     handler: src/lambda/http/updateTodo.handler
     events:
       - http:
           method: patch
           path: todos/{todoId}
+          authorizer: Auth
           cors: true
 
   # TODO: Configure this function
@@ -78,6 +71,7 @@ functions:
       - http:
           method: delete
           path: todos/{todoId}
+          authorizer: Auth
           cors: true
 
   # TODO: Configure this function

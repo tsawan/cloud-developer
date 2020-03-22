@@ -12,19 +12,34 @@ const todosTable = process.env.TODOS_TABLE
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   const todoId = event.pathParameters.todoId
 
-  // TODO: Remove a TODO item by id
-  const deleted = deleteTodo(todoId, event);
+  let result:APIGatewayProxyResult;
+
+  deleteTodo(todoId, event).then((data) => {
+    result = {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true
+      },
+      body: JSON.stringify({
+        data
+      })
+    }   
   
-  return {
-    statusCode: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': true
-    },
-    body: JSON.stringify({
-      deleted
-    })
-  }   
+  }, (err) => {
+    result = {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true
+      },
+      body: JSON.stringify({
+        err
+      })
+    }   
+  
+  })
+  return result;
 }
 
 const deleteTodo = async (todoId: string, event: APIGatewayProxyEvent) => {
