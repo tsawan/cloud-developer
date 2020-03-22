@@ -11,6 +11,7 @@ const docClient: DocumentClient = new DocumentClient()
 const todosTable = process.env.TODOS_TABLE
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  console.log('rcvd event ', event);
   const parsedBody: CreateTodoRequest = JSON.parse(event.body)
   console.log('received create req');
   const newTodo = {
@@ -26,6 +27,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   return {
     statusCode: 200,
     headers: {
+      'content-type': 'application/json',
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Credentials': true
     },

@@ -56,14 +56,11 @@ functions:
     handler: src/lambda/http/createTodo.handler
     events:
       - http:
-          method: post
+          method: POST
           path: todos
-          authorizer: Auth
-          cors:
-            - enabled: true
-            - origin: '*'
-            - headers: 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'
-            - methods: 'PUT,POST,UPDATE'          
+     #     authorizer: Auth
+          cors: true
+     #     integration: lambda
 
   # TODO: Configure this function
   UpdateTodo:
@@ -99,8 +96,8 @@ resources:
       Properties:
         ResponseParameters:
           gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
-          gatewayresponse.header.Access-Control-Allow-Methods: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST,PUT,DELETE'"
         ResponseType: DEFAULT_4XX
         RestApiId:
           Ref: ApiGatewayRestApi
