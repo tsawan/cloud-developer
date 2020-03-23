@@ -6,6 +6,7 @@ import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
 
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 //import { TodoItem } from '../../models/TodoItem'
+import { getUserId } from '../utils'
 
 const docClient: DocumentClient = new DocumentClient()
 const todosTable = process.env.TODOS_TABLE
@@ -14,7 +15,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   const todoId = event.pathParameters.todoId
   const updatedTodo: UpdateTodoRequest = JSON.parse(event.body)
 
-  const updated = updateTodo(todoId, updatedTodo, event);
+  const updated = await updateTodo(getUserId(event), todoId, updatedTodo);
   
   return {
     statusCode: 200,
@@ -28,16 +29,21 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   }   }
 
 
-  const updateTodo = async (todoId: string, updatedTodo: UpdateTodoRequest,
-    event: APIGatewayProxyEvent) => {
-      console.log(updatedTodo, event);
-    const response = await docClient.update({
-      TableName: todosTable,
-      Key: {
-        //userId: getUserId(event),
-        todoId: todoId
-      }
+  const updateTodo = async (userId: string, todoId: string, updatedTodo: UpdateTodoRequest):Promise<string> => {
+      await docClient.update({
+        TableName:todosTable,
+        Key:{
+          "userId":userId,
+          "todoId":todoId
+        },
+        ExpressionAttributeNames: {
+          "#D": "done"
+         },   
+      ExpressionAttributeValues:{
+        ":y": updatedTodo.done
+      },
+      UpdateExpression: "SET #D = :y",
+      ReturnValues:"ALL_NEW"
     }).promise()
-  
-    return response;
+    return todoId
   }

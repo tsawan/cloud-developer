@@ -106,6 +106,8 @@ resources:
                 AttributeType: S
               - AttributeName: todoId
                 AttributeType: S
+              - AttributeName: done
+                AttributeType: BOOL
             KeySchema:
               - AttributeName: userId
                 KeyType: HASH
