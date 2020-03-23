@@ -12,7 +12,7 @@ const todosTable = process.env.TODOS_TABLE
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   const todoId = event.pathParameters.todoId
   console.log(`will delete ${todoId} by ${getUserId(event)}`);
-  const response = deleteTodo(getUserId(event), todoId);
+  const response = await deleteTodo(getUserId(event), todoId);
 
   return {
       statusCode: 200,
@@ -34,6 +34,7 @@ const deleteTodo = async (userId:string, todoId:string):Promise<string> => {
       "todoId":todoId
     }
 }).promise()
-  return "Deleted"
+
+  return 'deleted';
 }
 
