@@ -4,6 +4,9 @@ import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } f
 
 import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
 
+import { createLogger } from '../../utils/logger'
+const logger = createLogger('updateTodo')
+
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 //import { TodoItem } from '../../models/TodoItem'
 import { getUserId } from '../utils'
@@ -16,6 +19,8 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   const updatedTodo: UpdateTodoRequest = JSON.parse(event.body)
 
   const updated = await updateTodo(getUserId(event), todoId, updatedTodo);
+  
+  logger.info(`Todo updated`, {todoId, done: updatedTodo.done})
   
   return {
     statusCode: 200,

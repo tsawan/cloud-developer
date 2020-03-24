@@ -5,6 +5,9 @@ import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } f
 import { CreateTodoRequest } from '../../requests/CreateTodoRequest'
 import * as uuid from 'uuid'
 
+import { createLogger } from '../../utils/logger'
+const logger = createLogger('createTodo')
+
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { getUserId } from '../utils'
 
@@ -25,6 +28,8 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
     TableName: todosTable,
     Item: newTodo
   }).promise()
+
+  logger.info(`Todo created for user`, {user: getUserId(event)})
 
   return {
     statusCode: 200,

@@ -6,6 +6,9 @@ import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { getUserId } from '../utils'
 import * as uuid from 'uuid'
 
+import { createLogger } from '../../utils/logger'
+const logger = createLogger('generateUploadUrl')
+
 const docClient: DocumentClient = new DocumentClient()
 const todosTable = process.env.TODOS_TABLE
 const imagesTable = process.env.IMAGES_TABLE
@@ -20,6 +23,8 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   const todoId = event.pathParameters.todoId
 
   const validTodoId = await todoExists(getUserId(event), todoId)
+
+  logger.info(`todo valid`, {validTodoId})
 
   if (!validTodoId) {
     return {
@@ -65,6 +70,8 @@ const generateURL = async (todoId:string,event:any) => {
   const imageId = uuid.v4()
   const newItem = await createImage(todoId, imageId)
   const url = getUploadUrl(imageId)
+  logger.info(`Generated attachment url`, {URL: url})
+
   await updateTodo(getUserId(event), todoId, getImageUrl(imageId));
   
     return {
