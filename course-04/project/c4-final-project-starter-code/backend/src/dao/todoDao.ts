@@ -1,13 +1,19 @@
 // default data layer for todo dynamodb table.
 
+import * as AWS  from 'aws-sdk'
+
+const AWSXRay = require('aws-xray-sdk')
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
+
+const XAWS = AWSXRay.captureAWS(AWS)
 import { TodoItem } from '../models/TodoItem'
 
 import { createLogger } from '../utils/logger'
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
+
 const logger = createLogger('todoDao')
 
-const docClient: DocumentClient = new DocumentClient()
+const docClient: DocumentClient = new XAWS.DynamoDB.DocumentClient()
 const todosTable = process.env.TODOS_TABLE
 
 const todoDao = <any>{}
