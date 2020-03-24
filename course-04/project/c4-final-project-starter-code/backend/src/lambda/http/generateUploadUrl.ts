@@ -41,7 +41,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
         'Access-Control-Allow-Credentials': true
       },
       body: JSON.stringify({
-        result
+        ...result
       })
     }  
 }
@@ -63,32 +63,27 @@ const todoExists = async (userId: string, todoId: string) => {
 
 const generateURL = async (todoId:string,event:any) => {
   const imageId = uuid.v4()
-  const newItem = await createImage(todoId, imageId, event)
+  const newItem = await createImage(todoId, imageId)
   const url = getUploadUrl(imageId)
+  await updateTodo(getUserId(event), todoId, getImageUrl(imageId));
   
     return {
-      statusCode: 201,
-      headers: {
-        'Access-Control-Allow-Origin': '*'
-      },
-      body: JSON.stringify({
         newItem: newItem,
         uploadUrl: url
-      })
     }
       
   }
 
-  const createImage = async (todoId: string, imageId: string, event: any) => {
+  const createImage = async (todoId: string, imageId: string) => {
     const timestamp = new Date().toISOString()
-    const newImage = JSON.parse(event.body)
+    //const newImage = JSON.parse(event.body)
   
     const newItem = {
       todoId,
       timestamp,
       imageId,
-      ...newImage,
-      imageUrl: `https://${bucketName}.s3.amazonaws.com/${imageId}`
+    //  ...newImage,
+      imageUrl: getImageUrl(imageId)
     }
     console.log('Storing new item: ', newItem)
   
@@ -102,6 +97,8 @@ const generateURL = async (todoId:string,event:any) => {
     return newItem
   }
 
+  const getImageUrl = (imageId) => `https://${bucketName}.s3.amazonaws.com/${imageId}`
+
   const getUploadUrl = (imageId: string) => {
     return s3.getSignedUrl('putObject', {
       Bucket: bucketName,
@@ -111,3 +108,21 @@ const generateURL = async (todoId:string,event:any) => {
     
   }
   
+  const updateTodo = async (userId: string, todoId: string, url: string):Promise<string> => {
+    await docClient.update({
+      TableName:todosTable,
+      Key:{
+        "userId":userId,
+        "todoId":todoId
+      },
+      ExpressionAttributeNames: {
+        "#D": "attachmentUrl"
+       },   
+    ExpressionAttributeValues:{
+      ":y": url
+    },
+    UpdateExpression: "SET #D = :y",
+    ReturnValues:"ALL_NEW"
+  }).promise()
+  return todoId
+}

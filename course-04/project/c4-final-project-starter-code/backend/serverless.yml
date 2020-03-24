@@ -190,7 +190,7 @@ resources:
                 - POST
                 - DELETE
                 - HEAD
-              MaxAge: 3000
+              MaxAge: 30000
 
     BucketPolicy:
       Type: AWS::S3::BucketPolicy
